@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,23 +14,19 @@ import SmtpSettings from '../components/SmtpSettings';
 const AdminConsole = () => {
   const [employees, setEmployees] = useState([
     {
-      id: '1',
-      name: 'Admin User',
-      email: 'admin@vidyut.com',
+      id: 'admin_001',
+      employeeId: 'ADN001',
+      firstName: 'Admin',
+      lastName: 'User',
+      fullName: 'Admin User',
+      email: 'vadmin@vidyutconsultancy.in',
       department: 'IT',
+      project: 'System Administration',
+      workLocation: 'Bangalore Office',
+      contactNumber: '+91 9876543210',
       role: 'admin',
       status: 'active',
       lastSeen: new Date(),
-      officeLocation: { lat: 12.9716, lng: 77.5946, radius: 100 }
-    },
-    {
-      id: '2',
-      name: 'John Doe',
-      email: 'employee@vidyut.com',
-      department: 'Engineering',
-      role: 'employee',
-      status: 'active',
-      lastSeen: new Date(Date.now() - 2 * 60 * 60 * 1000),
       officeLocation: { lat: 12.9716, lng: 77.5946, radius: 100 }
     }
   ]);
@@ -40,6 +37,12 @@ const AdminConsole = () => {
 
   const handleDeleteEmployee = (employeeId: string) => {
     setEmployees(prev => prev.filter(emp => emp.id !== employeeId));
+    
+    // Also remove from localStorage
+    const storedEmployees = JSON.parse(localStorage.getItem('vidyut_employees') || '[]');
+    const updatedEmployees = storedEmployees.filter((emp: any) => emp.id !== employeeId);
+    localStorage.setItem('vidyut_employees', JSON.stringify(updatedEmployees));
+    
     toast({
       title: "Employee Removed",
       description: "Employee has been removed from the system",
@@ -95,58 +98,53 @@ const AdminConsole = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Employee Management</CardTitle>
-                <CardDescription>Manage employees and their office locations</CardDescription>
+                <CardDescription>Manage employees and their details</CardDescription>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Department</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Office Location</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {employees.map((employee) => (
-                      <TableRow key={employee.id}>
-                        <TableCell className="font-medium">{employee.name}</TableCell>
-                        <TableCell>{employee.email}</TableCell>
-                        <TableCell>{employee.department}</TableCell>
-                        <TableCell>
-                          <Badge variant={employee.role === 'admin' ? 'default' : 'secondary'}>
-                            {employee.role}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={employee.status === 'active' ? 'default' : 'secondary'}>
-                            {employee.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="font-mono text-xs">
-                          {employee.officeLocation ? 
-                            `${employee.officeLocation.lat.toFixed(4)}, ${employee.officeLocation.lng.toFixed(4)}` 
-                            : 'Not set'
-                          }
-                        </TableCell>
-                        <TableCell>
-                          {employee.role !== 'admin' && (
-                            <Button 
-                              size="sm" 
-                              variant="destructive"
-                              onClick={() => handleDeleteEmployee(employee.id)}
-                            >
-                              Remove
-                            </Button>
-                          )}
-                        </TableCell>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Employee ID</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Department</TableHead>
+                        <TableHead>Project</TableHead>
+                        <TableHead>Work Location</TableHead>
+                        <TableHead>Role</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {employees.map((employee) => (
+                        <TableRow key={employee.id}>
+                          <TableCell className="font-mono">{employee.employeeId || 'N/A'}</TableCell>
+                          <TableCell className="font-medium">{employee.fullName}</TableCell>
+                          <TableCell>{employee.email}</TableCell>
+                          <TableCell>{employee.department}</TableCell>
+                          <TableCell>{employee.project || 'N/A'}</TableCell>
+                          <TableCell>{employee.workLocation || 'N/A'}</TableCell>
+                          <TableCell>
+                            <Badge variant={employee.role === 'admin' ? 'default' : 'secondary'}>
+                              {employee.role}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {employee.role !== 'admin' && (
+                              <Button 
+                                size="sm" 
+                                variant="destructive"
+                                onClick={() => handleDeleteEmployee(employee.id)}
+                              >
+                                Remove
+                              </Button>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

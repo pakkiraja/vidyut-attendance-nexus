@@ -1,248 +1,182 @@
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import Layout from '../components/Layout';
+import { useAuth } from '../contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import AttendanceCard from '../components/AttendanceCard';
 import LocationTracker from '../components/LocationTracker';
-import CameraCapture from '../components/CameraCapture';
 import RealTimeTracker from '../components/RealTimeTracker';
 import NotificationCenter from '../components/NotificationCenter';
-import LocationMap from '../components/LocationMap';
 import AnimatedAttendanceButtons from '../components/AnimatedAttendanceButtons';
-import { toast } from '@/hooks/use-toast';
-
-interface LocationPoint {
-  lat: number;
-  lng: number;
-  timestamp: Date;
-  type: 'checkin' | 'checkout' | 'tracking';
-}
+import PasswordManager from '../components/PasswordManager';
+import { Calendar, Clock, MapPin, User, Users, CheckCircle, XCircle, Bell } from 'lucide-react';
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const [todayAttendance, setTodayAttendance] = useState<any>(null);
-  const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
-  const [selfieData, setSelfieData] = useState<string | null>(null);
-  const [isCheckingIn, setIsCheckingIn] = useState(false);
-  const [isOfficeHours, setIsOfficeHours] = useState(false);
-  const [trackingPoints, setTrackingPoints] = useState<LocationPoint[]>([]);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Check if current time is office hours (9 AM - 6 PM)
   useEffect(() => {
-    const checkOfficeHours = () => {
-      const now = new Date();
-      const hour = now.getHours();
-      setIsOfficeHours(hour >= 9 && hour < 18);
-    };
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
 
-    checkOfficeHours();
-    const interval = setInterval(checkOfficeHours, 60000); // Check every minute
-
-    return () => clearInterval(interval);
+    return () => clearInterval(timer);
   }, []);
 
-  const handleLocationUpdate = (coords: {lat: number, lng: number}) => {
-    setLocation(coords);
+  // Mock data for dashboard
+  const todayStats = {
+    present: 23,
+    absent: 2,
+    late: 3,
+    onTime: 20
   };
 
-  const handleSelfieCapture = (imageData: string) => {
-    setSelfieData(imageData);
-  };
-
-  const handleCheckIn = async () => {
-    if (!location) {
-      toast({
-        title: "Location Required",
-        description: "Please enable location access to check in",
-        variant: "destructive"
-      });
-      return;
+  const notifications = [
+    {
+      id: 1,
+      type: 'birthday' as const,
+      title: 'Birthday Today!',
+      message: 'John Doe is celebrating his birthday today. Wish him well!',
+      time: new Date(Date.now() - 2 * 60 * 60 * 1000),
+      read: false
+    },
+    {
+      id: 2,
+      type: 'announcement' as const,
+      title: 'Office Notes',
+      message: 'Monthly team meeting scheduled for tomorrow at 10 AM in Conference Room A.',
+      time: new Date(Date.now() - 4 * 60 * 60 * 1000),
+      read: false
+    },
+    {
+      id: 3,
+      type: 'system' as const,
+      title: 'System Maintenance',
+      message: 'Scheduled maintenance will occur this weekend from 2 AM to 4 AM.',
+      time: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      read: true
     }
-
-    if (!selfieData) {
-      toast({
-        title: "Selfie Required",
-        description: "Please capture a selfie to verify your identity",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsCheckingIn(true);
-    
-    // Mock API call
-    setTimeout(() => {
-      const attendance = {
-        id: Date.now().toString(),
-        userId: user?.id,
-        checkIn: new Date(),
-        location: location,
-        selfie: selfieData,
-        status: 'present'
-      };
-      
-      // Add check-in tracking point
-      const checkInPoint: LocationPoint = {
-        lat: location.lat,
-        lng: location.lng,
-        timestamp: new Date(),
-        type: 'checkin'
-      };
-      setTrackingPoints(prev => [...prev, checkInPoint]);
-      
-      setTodayAttendance(attendance);
-      setIsCheckingIn(false);
-      
-      toast({
-        title: "Check-in Successful",
-        description: "Your attendance has been recorded",
-      });
-    }, 2000);
-  };
-
-  const handleCheckOut = async () => {
-    if (!todayAttendance) return;
-
-    setIsCheckingIn(true);
-    
-    // Mock API call
-    setTimeout(() => {
-      // Add check-out tracking point
-      if (location) {
-        const checkOutPoint: LocationPoint = {
-          lat: location.lat,
-          lng: location.lng,
-          timestamp: new Date(),
-          type: 'checkout'
-        };
-        setTrackingPoints(prev => [...prev, checkOutPoint]);
-      }
-
-      setTodayAttendance(prev => ({
-        ...prev,
-        checkOut: new Date()
-      }));
-      setIsCheckingIn(false);
-      
-      toast({
-        title: "Check-out Successful",
-        description: "Your checkout has been recorded",
-      });
-    }, 1000);
-  };
+  ];
 
   return (
     <Layout>
       <div className="space-y-6">
+        {/* Welcome Section */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
-              Welcome back, {user?.name}!
+              Welcome back, {user?.fullName || user?.firstName}!
             </h1>
             <p className="text-gray-600 mt-1">
-              {new Date().toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              })}
+              {currentTime.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })} • {currentTime.toLocaleTimeString()}
             </p>
           </div>
-          {isOfficeHours && (
-            <div className="text-right">
-              <div className="text-sm text-green-600 font-medium">Office Hours Active</div>
-              <div className="text-xs text-gray-500">Real-time tracking enabled</div>
-            </div>
-          )}
+          <Badge variant="outline" className="text-lg px-4 py-2">
+            <User className="w-4 h-4 mr-2" />
+            {user?.role === 'admin' ? 'Administrator' : 'Employee'}
+          </Badge>
         </div>
 
-        {/* Notifications Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <NotificationCenter />
-          </div>
-          <AttendanceCard 
-            attendance={todayAttendance}
-            onCheckIn={handleCheckIn}
-            onCheckOut={handleCheckOut}
-            isLoading={isCheckingIn}
-          />
-        </div>
-
-        {/* Animated Check-in/out Section */}
-        <Card>
-          <CardContent className="py-8">
-            <AnimatedAttendanceButtons
-              onCheckIn={handleCheckIn}
-              onCheckOut={handleCheckOut}
-              isLoading={isCheckingIn}
-              hasCheckedIn={!!todayAttendance && !todayAttendance.checkOut}
-              isLocationLocked={!!location}
-              hasSelfie={!!selfieData}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Location and Selfie Verification */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <LocationTracker onLocationUpdate={handleLocationUpdate} />
-          <CameraCapture onCapture={handleSelfieCapture} />
-        </div>
-
-        {/* Real-time Tracking and Map */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <RealTimeTracker 
-            isOfficeHours={isOfficeHours}
-            onLocationUpdate={(locationData) => {
-              console.log('Real-time location:', locationData);
-              // Add tracking point during office hours
-              if (isOfficeHours) {
-                const trackingPoint: LocationPoint = {
-                  lat: locationData.lat,
-                  lng: locationData.lng,
-                  timestamp: locationData.timestamp,
-                  type: 'tracking'
-                };
-                setTrackingPoints(prev => [...prev.slice(-99), trackingPoint]); // Keep last 100 points
-              }
-            }}
-          />
-          <LocationMap
-            currentLocation={location}
-            trackingPoints={trackingPoints}
-            onLocationUpdate={handleLocationUpdate}
-          />
-        </div>
-
-        {/* Quick Stats */}
+        {/* User Profile Card */}
         <Card>
           <CardHeader>
-            <CardTitle>Quick Stats</CardTitle>
-            <CardDescription>Your attendance overview</CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              <User className="w-5 h-5" />
+              Profile Information
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <p className="text-2xl font-bold text-green-600">22</p>
-                <p className="text-sm text-green-700">Days Present</p>
-              </div>
-              <div className="text-center p-4 bg-red-50 rounded-lg">
-                <p className="text-2xl font-bold text-red-600">2</p>
-                <p className="text-sm text-red-700">Days Absent</p>
-              </div>
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <p className="text-2xl font-bold text-blue-600">91.7%</p>
-                <p className="text-sm text-blue-700">Attendance Rate</p>
-              </div>
-              <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                <p className="text-2xl font-bold text-yellow-600">8h 15m</p>
-                <p className="text-sm text-yellow-700">Avg Hours</p>
-              </div>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <p className="text-sm text-gray-600">Employee ID</p>
+              <p className="font-medium">{user?.employeeId || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Department</p>
+              <p className="font-medium">{user?.department}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Project</p>
+              <p className="font-medium">{user?.project || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Work Location</p>
+              <p className="font-medium">{user?.workLocation || 'N/A'}</p>
             </div>
           </CardContent>
         </Card>
+
+        {/* Admin Dashboard */}
+        {user?.role === 'admin' ? (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-2xl font-bold text-green-600">{todayStats.present}</p>
+                    <p className="text-sm text-gray-600">Present Today</p>
+                  </div>
+                  <CheckCircle className="w-8 h-8 text-green-600" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-2xl font-bold text-red-600">{todayStats.absent}</p>
+                    <p className="text-sm text-gray-600">Absent Today</p>
+                  </div>
+                  <XCircle className="w-8 h-8 text-red-600" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-2xl font-bold text-yellow-600">{todayStats.late}</p>
+                    <p className="text-sm text-gray-600">Late Arrivals</p>
+                  </div>
+                  <Clock className="w-8 h-8 text-yellow-600" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-2xl font-bold text-blue-600">{todayStats.onTime}</p>
+                    <p className="text-sm text-gray-600">On Time</p>
+                  </div>
+                  <Users className="w-8 h-8 text-blue-600" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          /* Employee Dashboard */
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left Column */}
+            <div className="space-y-6">
+              <AnimatedAttendanceButtons />
+              <AttendanceCard />
+              <PasswordManager />
+            </div>
+            
+            {/* Right Column */}
+            <div className="space-y-6">
+              <NotificationCenter notifications={notifications} />
+              <LocationTracker />
+              <RealTimeTracker />
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );

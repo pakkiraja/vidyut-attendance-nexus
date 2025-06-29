@@ -4,15 +4,22 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 interface User {
   id: string;
   email: string;
-  name: string;
+  employeeId?: string;
+  firstName: string;
+  lastName: string;
+  initials?: string;
+  fullName: string;
   role: 'employee' | 'admin';
   department: string;
+  project?: string;
+  workLocation?: string;
+  contactNumber?: string;
   isApproved: boolean;
   avatar?: string;
   officeLocation?: {
     lat: number;
     lng: number;
-    radius: number; // in meters
+    radius: number;
   };
 }
 
@@ -20,6 +27,8 @@ interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
+  resetPassword: (email: string) => Promise<boolean>;
   isLoading: boolean;
 }
 
@@ -47,12 +56,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    // Mock authentication - replace with actual API call
-    const mockUsers: User[] = [
-      {
-        id: '1',
-        email: 'admin@vidyut.com',
-        name: 'Admin User',
+    // Check admin credentials
+    if (email === 'vadmin@vidyutconsultancy.in' && password === 'Vidyut@2025') {
+      const adminUser: User = {
+        id: 'admin_001',
+        email: 'vadmin@vidyutconsultancy.in',
+        firstName: 'Admin',
+        lastName: 'User',
+        fullName: 'Admin User',
         role: 'admin',
         department: 'IT',
         isApproved: true,
@@ -61,29 +72,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           lng: 77.5946,
           radius: 100
         }
-      },
-      {
-        id: '2',
-        email: 'employee@vidyut.com',
-        name: 'John Doe',
-        role: 'employee',
-        department: 'Engineering',
-        isApproved: true,
-        officeLocation: {
-          lat: 12.9716,
-          lng: 77.5946,
-          radius: 100
-        }
-      }
-    ];
-
-    const foundUser = mockUsers.find(u => u.email === email);
-    if (foundUser && foundUser.isApproved) {
-      setUser(foundUser);
-      localStorage.setItem('vidyut_user', JSON.stringify(foundUser));
+      };
+      setUser(adminUser);
+      localStorage.setItem('vidyut_user', JSON.stringify(adminUser));
       return true;
     }
+
+    // Check employee credentials from localStorage (simulated database)
+    const employees = JSON.parse(localStorage.getItem('vidyut_employees') || '[]');
+    const foundEmployee = employees.find((emp: User) => emp.email === email);
+    
+    if (foundEmployee && foundEmployee.isApproved) {
+      setUser(foundEmployee);
+      localStorage.setItem('vidyut_user', JSON.stringify(foundEmployee));
+      return true;
+    }
+    
     return false;
+  };
+
+  const changePassword = async (currentPassword: string, newPassword: string): Promise<boolean> => {
+    // In a real app, this would validate the current password and update it in the database
+    // For now, we'll just simulate success
+    setTimeout(() => {
+      console.log('Password changed successfully');
+    }, 1000);
+    return true;
+  };
+
+  const resetPassword = async (email: string): Promise<boolean> => {
+    // In a real app, this would send a password reset email
+    // For now, we'll just simulate success
+    console.log(`Password reset link sent to ${email}`);
+    return true;
   };
 
   const logout = () => {
@@ -92,7 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, changePassword, resetPassword, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
