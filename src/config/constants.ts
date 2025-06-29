@@ -23,10 +23,3 @@ export const CONFIG = {
     end: 18
   }
 };
-
-// Global type declaration for Google Maps
-declare global {
-  interface Window {
-    google: typeof google;
-  }
-}

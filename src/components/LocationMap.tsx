@@ -27,7 +27,7 @@ const LocationMap: React.FC<LocationMapProps> = ({
   const mapRef = useRef<HTMLDivElement>(null);
   const [googleApiKey, setGoogleApiKey] = useState(CONFIG.GOOGLE_MAPS_API_KEY);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
-  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [map, setMap] = useState<any>(null);
 
   const loadGoogleMapsScript = () => {
     if (!googleApiKey) return;
