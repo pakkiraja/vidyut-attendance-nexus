@@ -208,7 +208,7 @@ const ReportExport = () => {
               <Checkbox
                 id="autoSchedule"
                 checked={autoSchedule}
-                onCheckedChange={setAutoSchedule}
+                onCheckedChange={(checked) => setAutoSchedule(checked === true)}
               />
               <label htmlFor="autoSchedule" className="text-sm">
                 Enable monthly auto-reports
