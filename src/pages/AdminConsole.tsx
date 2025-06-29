@@ -7,26 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from '@/hooks/use-toast';
+import EmployeeOnboarding from '../components/EmployeeOnboarding';
+import ReportExport from '../components/ReportExport';
 
 const AdminConsole = () => {
-  const [pendingUsers] = useState([
-    {
-      id: '3',
-      name: 'Jane Smith',
-      email: 'jane@company.com',
-      department: 'Marketing',
-      registeredAt: new Date('2024-01-15')
-    },
-    {
-      id: '4',
-      name: 'Bob Johnson',
-      email: 'bob@company.com',
-      department: 'Finance',
-      registeredAt: new Date('2024-01-14')
-    }
-  ]);
-
-  const [employees] = useState([
+  const [employees, setEmployees] = useState([
     {
       id: '1',
       name: 'Admin User',
@@ -34,7 +19,8 @@ const AdminConsole = () => {
       department: 'IT',
       role: 'admin',
       status: 'active',
-      lastSeen: new Date()
+      lastSeen: new Date(),
+      officeLocation: { lat: 12.9716, lng: 77.5946, radius: 100 }
     },
     {
       id: '2',
@@ -43,37 +29,38 @@ const AdminConsole = () => {
       department: 'Engineering',
       role: 'employee',
       status: 'active',
-      lastSeen: new Date(Date.now() - 2 * 60 * 60 * 1000)
+      lastSeen: new Date(Date.now() - 2 * 60 * 60 * 1000),
+      officeLocation: { lat: 12.9716, lng: 77.5946, radius: 100 }
     }
   ]);
 
-  const handleApproveUser = (userId: string) => {
-    toast({
-      title: "User Approved",
-      description: "User has been approved and can now access the system",
-    });
+  const handleEmployeeAdd = (newEmployee: any) => {
+    setEmployees(prev => [...prev, newEmployee]);
   };
 
-  const handleRejectUser = (userId: string) => {
+  const handleDeleteEmployee = (employeeId: string) => {
+    setEmployees(prev => prev.filter(emp => emp.id !== employeeId));
     toast({
-      title: "User Rejected",
-      description: "User registration has been rejected",
-      variant: "destructive"
+      title: "Employee Removed",
+      description: "Employee has been removed from the system",
     });
   };
 
   return (
     <Layout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Admin Console</h1>
-          <p className="text-gray-600 mt-1">Manage users and system settings</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Admin Console</h1>
+            <p className="text-gray-600 mt-1">Manage employees and system settings</p>
+          </div>
+          <EmployeeOnboarding onEmployeeAdd={handleEmployeeAdd} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="pt-6">
-              <div className="text-2xl font-bold text-blue-600">25</div>
+              <div className="text-2xl font-bold text-blue-600">{employees.length}</div>
               <p className="text-sm text-gray-600">Total Employees</p>
             </CardContent>
           </Card>
@@ -91,78 +78,23 @@ const AdminConsole = () => {
           </Card>
           <Card>
             <CardContent className="pt-6">
-              <div className="text-2xl font-bold text-yellow-600">{pendingUsers.length}</div>
-              <p className="text-sm text-gray-600">Pending Approval</p>
+              <div className="text-2xl font-bold text-yellow-600">85%</div>
+              <p className="text-sm text-gray-600">In Office Now</p>
             </CardContent>
           </Card>
         </div>
 
-        <Tabs defaultValue="pending" className="w-full">
+        <Tabs defaultValue="employees" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="pending">Pending Approvals</TabsTrigger>
             <TabsTrigger value="employees">Employee Management</TabsTrigger>
+            <TabsTrigger value="reports">Reports & Export</TabsTrigger>
           </TabsList>
-          
-          <TabsContent value="pending">
-            <Card>
-              <CardHeader>
-                <CardTitle>Pending User Approvals</CardTitle>
-                <CardDescription>Review and approve new user registrations</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {pendingUsers.length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Department</TableHead>
-                        <TableHead>Registered</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {pendingUsers.map((user) => (
-                        <TableRow key={user.id}>
-                          <TableCell className="font-medium">{user.name}</TableCell>
-                          <TableCell>{user.email}</TableCell>
-                          <TableCell>{user.department}</TableCell>
-                          <TableCell>{user.registeredAt.toLocaleDateString()}</TableCell>
-                          <TableCell>
-                            <div className="flex gap-2">
-                              <Button 
-                                size="sm" 
-                                onClick={() => handleApproveUser(user.id)}
-                              >
-                                Approve
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="destructive"
-                                onClick={() => handleRejectUser(user.id)}
-                              >
-                                Reject
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    No pending approvals
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
           
           <TabsContent value="employees">
             <Card>
               <CardHeader>
                 <CardTitle>Employee Management</CardTitle>
-                <CardDescription>Manage existing employees</CardDescription>
+                <CardDescription>Manage employees and their office locations</CardDescription>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -173,7 +105,8 @@ const AdminConsole = () => {
                       <TableHead>Department</TableHead>
                       <TableHead>Role</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Last Seen</TableHead>
+                      <TableHead>Office Location</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -192,13 +125,33 @@ const AdminConsole = () => {
                             {employee.status}
                           </Badge>
                         </TableCell>
-                        <TableCell>{employee.lastSeen.toLocaleString()}</TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {employee.officeLocation ? 
+                            `${employee.officeLocation.lat.toFixed(4)}, ${employee.officeLocation.lng.toFixed(4)}` 
+                            : 'Not set'
+                          }
+                        </TableCell>
+                        <TableCell>
+                          {employee.role !== 'admin' && (
+                            <Button 
+                              size="sm" 
+                              variant="destructive"
+                              onClick={() => handleDeleteEmployee(employee.id)}
+                            >
+                              Remove
+                            </Button>
+                          )}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+          
+          <TabsContent value="reports">
+            <ReportExport />
           </TabsContent>
         </Tabs>
       </div>

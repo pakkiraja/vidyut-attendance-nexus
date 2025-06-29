@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import AttendanceCard from '../components/AttendanceCard';
 import LocationTracker from '../components/LocationTracker';
 import CameraCapture from '../components/CameraCapture';
+import RealTimeTracker from '../components/RealTimeTracker';
 import { toast } from '@/hooks/use-toast';
 
 const Dashboard = () => {
@@ -15,6 +16,21 @@ const Dashboard = () => {
   const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
   const [selfieData, setSelfieData] = useState<string | null>(null);
   const [isCheckingIn, setIsCheckingIn] = useState(false);
+  const [isOfficeHours, setIsOfficeHours] = useState(false);
+
+  // Check if current time is office hours (9 AM - 6 PM)
+  useEffect(() => {
+    const checkOfficeHours = () => {
+      const now = new Date();
+      const hour = now.getHours();
+      setIsOfficeHours(hour >= 9 && hour < 18);
+    };
+
+    checkOfficeHours();
+    const interval = setInterval(checkOfficeHours, 60000); // Check every minute
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLocationUpdate = (coords: {lat: number, lng: number}) => {
     setLocation(coords);
@@ -103,6 +119,12 @@ const Dashboard = () => {
               })}
             </p>
           </div>
+          {isOfficeHours && (
+            <div className="text-right">
+              <div className="text-sm text-green-600 font-medium">Office Hours Active</div>
+              <div className="text-xs text-gray-500">Real-time tracking enabled</div>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -141,9 +163,16 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <LocationTracker onLocationUpdate={handleLocationUpdate} />
           <CameraCapture onCapture={handleSelfieCapture} />
+          <RealTimeTracker 
+            isOfficeHours={isOfficeHours}
+            onLocationUpdate={(locationData) => {
+              console.log('Real-time location:', locationData);
+              // This would be sent to the server for tracking
+            }}
+          />
         </div>
       </div>
     </Layout>

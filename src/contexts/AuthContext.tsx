@@ -9,13 +9,17 @@ interface User {
   department: string;
   isApproved: boolean;
   avatar?: string;
+  officeLocation?: {
+    lat: number;
+    lng: number;
+    radius: number; // in meters
+  };
 }
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
-  register: (userData: Omit<User, 'id' | 'isApproved'> & { password: string }) => Promise<boolean>;
   isLoading: boolean;
 }
 
@@ -51,7 +55,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         name: 'Admin User',
         role: 'admin',
         department: 'IT',
-        isApproved: true
+        isApproved: true,
+        officeLocation: {
+          lat: 12.9716,
+          lng: 77.5946,
+          radius: 100
+        }
       },
       {
         id: '2',
@@ -59,7 +68,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         name: 'John Doe',
         role: 'employee',
         department: 'Engineering',
-        isApproved: true
+        isApproved: true,
+        officeLocation: {
+          lat: 12.9716,
+          lng: 77.5946,
+          radius: 100
+        }
       }
     ];
 
@@ -72,26 +86,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return false;
   };
 
-  const register = async (userData: Omit<User, 'id' | 'isApproved'> & { password: string }): Promise<boolean> => {
-    // Mock registration - replace with actual API call
-    const newUser: User = {
-      ...userData,
-      id: Date.now().toString(),
-      isApproved: false
-    };
-    
-    // In real implementation, save to database
-    console.log('New user registered:', newUser);
-    return true;
-  };
-
   const logout = () => {
     setUser(null);
     localStorage.removeItem('vidyut_user');
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
