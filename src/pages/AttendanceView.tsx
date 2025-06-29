@@ -4,7 +4,7 @@ import Layout from '../components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, DateRange } from 'react-day-picker';
+import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
@@ -18,7 +18,7 @@ const AttendanceView = () => {
       checkIn: '09:15 AM',
       checkOut: '06:30 PM',
       hours: '8h 45m',
-      status: 'present',
+      status: 'present' as const,
       location: 'Office'
     },
     {
@@ -26,7 +26,7 @@ const AttendanceView = () => {
       checkIn: '09:30 AM',
       checkOut: '06:15 PM',
       hours: '8h 15m',
-      status: 'present',
+      status: 'present' as const,
       location: 'Office'
     },
     {
@@ -34,7 +34,7 @@ const AttendanceView = () => {
       checkIn: '10:00 AM',
       checkOut: '07:00 PM',
       hours: '8h 30m',
-      status: 'late',
+      status: 'late' as const,
       location: 'Office'
     },
     {
@@ -42,18 +42,18 @@ const AttendanceView = () => {
       checkIn: '-',
       checkOut: '-',
       hours: '0h',
-      status: 'absent',
+      status: 'absent' as const,
       location: '-'
     }
   ];
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: 'present' | 'late' | 'absent') => {
     const variants = {
-      present: 'default',
-      late: 'secondary',
-      absent: 'destructive'
+      present: 'default' as const,
+      late: 'secondary' as const,
+      absent: 'destructive' as const
     };
-    return <Badge variant={variants[status as keyof typeof variants]}>{status}</Badge>;
+    return <Badge variant={variants[status]}>{status}</Badge>;
   };
 
   return (
