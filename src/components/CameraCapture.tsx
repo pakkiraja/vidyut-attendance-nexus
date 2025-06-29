@@ -138,9 +138,9 @@ const CameraCapture: React.FC<CameraCaptureProps> = ({ onCapture }) => {
               <Button onClick={stopCamera} variant="outline" className="flex-1">
                 Cancel
               </Button>
-              <Button onClick={capturePhoto} className="flex-1">
+              <Button onClick={capturePhoto} className="flex-1 bg-blue-600 hover:bg-blue-700">
                 <Camera className="w-4 h-4 mr-2" />
-                Capture Photo
+                Take Selfie
               </Button>
             </div>
           </div>

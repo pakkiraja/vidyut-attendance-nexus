@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { MapPin, Navigation } from 'lucide-react';
+import { CONFIG } from '../config/constants';
 
 interface LocationPoint {
   lat: number;
@@ -24,9 +25,9 @@ const LocationMap: React.FC<LocationMapProps> = ({
   onLocationUpdate 
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const [googleApiKey, setGoogleApiKey] = useState('');
+  const [googleApiKey, setGoogleApiKey] = useState(CONFIG.GOOGLE_MAPS_API_KEY);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
-  const [map, setMap] = useState<any>(null);
+  const [map, setMap] = useState<google.maps.Map | null>(null);
 
   const loadGoogleMapsScript = () => {
     if (!googleApiKey) return;
@@ -76,7 +77,7 @@ const LocationMap: React.FC<LocationMapProps> = ({
     });
 
     // Add tracking points
-    trackingPoints.forEach((point, index) => {
+    trackingPoints.forEach((point) => {
       const marker = new window.google.maps.Marker({
         position: { lat: point.lat, lng: point.lng },
         map: mapInstance,

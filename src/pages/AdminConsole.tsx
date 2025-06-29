@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { toast } from '@/hooks/use-toast';
 import EmployeeOnboarding from '../components/EmployeeOnboarding';
 import ReportExport from '../components/ReportExport';
+import SmtpSettings from '../components/SmtpSettings';
 
 const AdminConsole = () => {
   const [employees, setEmployees] = useState([
@@ -85,9 +85,10 @@ const AdminConsole = () => {
         </div>
 
         <Tabs defaultValue="employees" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="employees">Employee Management</TabsTrigger>
             <TabsTrigger value="reports">Reports & Export</TabsTrigger>
+            <TabsTrigger value="settings">Email Settings</TabsTrigger>
           </TabsList>
           
           <TabsContent value="employees">
@@ -152,6 +153,10 @@ const AdminConsole = () => {
           
           <TabsContent value="reports">
             <ReportExport />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <SmtpSettings />
           </TabsContent>
         </Tabs>
       </div>
